@@ -1,14 +1,16 @@
 const express = require("express");
-const isloggedin = require("../Middlewares/isloggedin");
 const router = express.Router();
+const isloggedin = require("../Middlewares/isloggedin");
 
 router.get("/", function (req, res) {
-  let error = req.flash("Error");
-  res.send("hello");
+  let error = req.flash("error");
+  res.send(error.message);
 });
 
-router.get("/logout",isloggedin, function (req, res) {
-  res.render("/");
+router.get("/logout", isloggedin, function (req, res) {
+  req.logout();
+  req.flash("success", "Logged out successfully!");
+  res.redirect("http://localhost:5173/");
 });
 
 module.exports = router;

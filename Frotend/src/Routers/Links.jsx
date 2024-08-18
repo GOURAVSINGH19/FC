@@ -1,20 +1,25 @@
-import React, { useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import Login from "../Components/LoginPage/Login";
 import Signin from "../Components/SigninPage/Signin";
-import { Navigate, Route, Routes } from "react-router-dom";
-import Api from "../Api/Api";
+import { Route, Routes, useNavigate } from "react-router-dom";
 import Dashboard from "../Components/Dashboard/Dashboard";
 import Home from "../Components/Home/Home";
 import { ToastContainer } from "react-toastify";
 import Notfound from "../Components/Notfound";
-
+import ForgetPassword from "../Components/Forgetpassword/ForgetPassword";
+import ChangePassword from "../Components/Forgetpassword/ChangePassword";
+import { GoogleOAuthProvider } from "@react-oauth/google";
 const Links = () => {
-  // const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const userToken = localStorage.getItem("token");
 
-  // const PrivateRoute = ({ element }) => {
-  //   return isAuthenticated ? element : <Navigate to="/login" />;
-  // };
-
+  const GoogleLogin = () => {
+    const id = "1041971490330-als8m1itahm6192bn019ssmpmcp1lujk.apps.googleusercontent.com";
+    return (
+      <GoogleOAuthProvider clientId={id}>
+        <Login />
+      </GoogleOAuthProvider>
+    );
+  };
   return (
     <>
       <ToastContainer
@@ -31,11 +36,13 @@ const Links = () => {
         transition:Bounce
       />
       <Routes>
-        <Route path="/" element={<Home />} />
-        <Route path="/dashboard" element={<Dashboard />} />
-        <Route path="/login" element={<Login />} />
+        <Route path="/" element={<Home />} />​
+        {userToken && <Route path="/dashboard" element={<Dashboard />} />}
+        <Route path="/login" element={<GoogleLogin />} />
         <Route path="/signup" element={<Signin />} />
-        <Route path="*" element={<Notfound/>}/>
+        <Route path="/forget-password" element={<ForgetPassword />} />
+        <Route path="/reset_password/:token" element={<ChangePassword />} />
+        <Route path="*" element={<Notfound />} />
       </Routes>
     </>
   );

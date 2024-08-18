@@ -1,11 +1,11 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import { Link, useNavigate } from "react-router-dom";
 import { FaGoogle } from "react-icons/fa";
 import { FaGithub } from "react-icons/fa";
 import axios from "axios";
 import { toast } from "react-toastify";
-
+import { useGoogleLogin } from "@react-oauth/google";
 const Login = () => {
   const navigate = useNavigate();
   const [data, setdata] = useState({
@@ -18,39 +18,55 @@ const Login = () => {
     handleSubmit,
     formState: { errors, isSubmitting },
   } = useForm({
-    defaultValues:{
+    defaultValues: {
       email: "",
       password: "",
-    }
+    },
   });
 
   const handleChange = (e) => {
+    e.preventDefault();
     setdata((prevState) => ({
       ...prevState,
       [e.target.name]: e.target.value,
     }));
   };
 
-  const onsubmit = async () => {
+  const onsubmit = async (e) => {
     const { email, password } = data;
     try {
-      const respone = await axios.post("/users/login", {
+      const { data: res } = await axios.post("/login", {
         email,
         password,
       });
-      console.log(respone);
-      const { data } = respone;
-      if (data.errors) {
-        toast.error("Error: " + data.errors);
-      } else {
-        setdata({});
-        toast.success("User login successfully");
-        navigate("/dashboard");
-      }
+      localStorage.setItem("token", res.data);
+      toast.success("User login successfully");
+      navigate("/dashboard");
     } catch (err) {
       console.log("error in login", err);
     }
   };
+
+  const responese = async (authResult) => {
+    try {
+      if (authResult["code"]) {
+        const result = await axios.post("/google", {
+          code: authResult["code"],
+        });
+        localStorage.setItem("token", result.data);
+        toast.success("Google login success");
+        navigate("/dashboard");
+      }
+    } catch (err) {
+      console.log("Error during Google login", err);
+    }
+  };
+
+  const googlelogin = useGoogleLogin({
+    onSuccess: responese,
+    onError: responese,
+    flow: "auth-code",
+  });
 
   return (
     <div className="w-screen h-screen p-[1rem]">
@@ -78,16 +94,18 @@ const Login = () => {
         <div className="md:w-1/2 relative w-full  h-[100%] text-white ">
           <div className="w-full  h-full flex flex-col justify-center items-center ">
             <div className=" w-full relative h-[10%] flex flex-col justify-end mb-[3vw]">
-              <div className="flex items-center justify-center gap-5 mb-5">
-                <h1 className="text-[4vw] mb-3">Hey, hello</h1>
-                <span className="hand text-3xl">👋</span>
+              <div className="flex justify-center flex-col items-center">
+                <div className="flex items-center justify-center gap-5 mb-5">
+                  <h1 className="text-[4.5rem] mb-3">Hey, hello</h1>
+                  <span className="hand text-3xl">👋</span>
+                </div>
+                <p className="text-lg font-serif">
+                  Create an account
+                  <span className="text-purple-500 text-xl ml-3 border-b-2 border-white">
+                    <Link to="/signup">Signup</Link>
+                  </span>
+                </p>
               </div>
-              <p className="text-lg absolute left-[29%] bottom-0 font-serif">
-                Create an account
-                <span className="text-purple-500 text-xl ml-3 border-b-2 border-white">
-                  <Link to="/signup">Signup</Link>
-                </span>
-              </p>
             </div>
             <div className="w-full flex  justify-center    relative">
               <form onSubmit={handleSubmit(onsubmit)}>
@@ -109,7 +127,11 @@ const Login = () => {
                     })}
                   />
                   {errors.email && (
-                    <p style={{ color: "orangered" }}>{errors.email.message}</p>
+                    <>
+                      <p style={{ color: "orangered" }}>
+                        {errors.email.message}
+                      </p>
+                    </>
                   )}
                 </div>
                 <div className="w-96 mb-5 flex flex-col">
@@ -129,20 +151,22 @@ const Login = () => {
                     })}
                   />
                   {errors.password && (
-                    <p style={{ color: "orangered" }}>
-                      {errors.password.message}
-                    </p>
+                    <>
+                      <p style={{ color: "orangered" }}>
+                        {errors.password.message}
+                      </p>
+                    </>
                   )}
                 </div>
                 <div className="w-full flex justify-end  mb-5">
-                  <Link to="/forgot-password">Forgot Password?</Link>
+                  <Link to="/forget-password">Forgot Password?</Link>
                 </div>
                 <button
                   className="bg-purple-400 px-3 py-2 text-white w-full  rounded-md flex justify-center"
                   type="submit"
                   disabled={isSubmitting}
                 >
-                  {isSubmitting ? "Submitting..." : "Submit"}
+                  {isSubmitting ? "Submitting..." : "Login"}
                 </button>
               </form>
             </div>
@@ -154,7 +178,10 @@ const Login = () => {
             <div className="mt-5 flex items-center gap-12">
               <button className="w-40 flex border-2 gap-5 border-zinc-600 py-4 px-3 items-center rounded-md">
                 <FaGoogle className="text-2xl" />
-                <span className="ml-3 capitalize font-serif text-xl">
+                <span
+                  className="ml-3 capitalize font-serif text-xl"
+                  onClick={googlelogin}
+                >
                   Google
                 </span>
               </button>

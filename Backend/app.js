@@ -1,6 +1,5 @@
 const express = require("express");
 const app = express();
-const db = require("./config/mongoose-connection");
 const cookieParser = require("cookie-parser");
 const flash = require("connect-flash");
 const expressSession = require("express-session");
@@ -10,7 +9,9 @@ const path = require("path");
 const index = require("./routers/index");
 const usersrouter = require("./routers/Userroute");
 
-require("dotenv").config();
+const dotenv = require('dotenv');
+
+dotenv.config();
 
 app.use(cors({ credentials: true, origin: "http://localhost:5173" }));
 
@@ -25,11 +26,9 @@ app.use(
   })
 );
 
-
 // By using flash, you can easily display temporary messages to users and provide a better user experience.
 app.use(flash());
 app.use(express.static(path.join(__dirname, "public")));
-
 
 app.use("/", index);
 app.use("/users", usersrouter);

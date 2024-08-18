@@ -1,18 +1,20 @@
 import React from "react";
 import Links from "./Routers/Links";
 import axios from "axios";
-axios.defaults.baseURL = "http://localhost:8000";
+// import { UserContextProvider } from "./context/ContextApi";
+axios.defaults.baseURL = "http://localhost:8000/users";
 axios.defaults.withCredentials = true;
-axios.defaults.headers={
+axios.defaults.headers = {
   "Content-Type": "application/json",
-  "Authorization": `Bearer ${localStorage.getItem("token")}`,
-}
+};
 
 const App = () => {
   return (
-    <div className="w-screen h-screen bg-zinc-700">
-      <Links />
-    </div>
+    // <UserContextProvider>
+      <div className="w-screen  min-h-screen bg-zinc-900">
+        <Links />
+      </div>
+    // </UserContextProvider>
   );
 };
 

@@ -1,24 +1,17 @@
-import { useEffect } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import axios from "axios";
 
-function API({ setIsAuthenticated }) {
-  const location = useLocation();
-  const navigate = useNavigate();
+// export const api = axios.create({
+//   baseURL: "http://localhost:8000/users",
+//   headers: {
+//     "Content-Type": "application/json",
+//   },
+//   withCredentials: true,
+// });
 
-  useEffect(() => {
-    if (localStorage.getItem("token")) {
-      setIsAuthenticated(true);
-      if (
-        location.pathname === "/" ||
-        location.pathname === "/login" ||
-        location.pathname === "/signup"
-      ) {
-        navigate("/home", { replace: false });
-      }
-    }
-  }, [location, navigate, setIsAuthenticated]);
+// axios.defaults.headers = {
+//     "Content-Type": "application/json",
+// }
+// axios.defaults.baseURL = "http://localhost:8000/users"
+// axios.defaults.withCredentials=true
 
-  return null;
-}
-
-export default API;
+export const getUsers = (code) => axios.get(`/google?code=${code}`);

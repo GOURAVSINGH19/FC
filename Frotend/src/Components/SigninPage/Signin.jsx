@@ -5,7 +5,8 @@ import { FaGoogle } from "react-icons/fa";
 import { FaGithub } from "react-icons/fa";
 import axios from "axios";
 import { toast } from "react-toastify";
-const Login = () => {
+import { useGoogleLogin } from "@react-oauth/google";
+const signup = () => {
   const navigate = useNavigate();
 
   const [data, setdata] = useState({
@@ -37,28 +38,38 @@ const Login = () => {
   };
 
   const onsubmit = async (e) => {
-    const { firstname, lastname, email, password , confirmPassword } = data;
+    const { firstname, lastname, email, password, confirmPassword } = data;
     try {
-      const respone = await axios.post("/users/register", {
+      const { data } = await axios.post("/users/register", {
         email,
         firstname,
         lastname,
         password,
-        confirmPassword
+        confirmPassword,
       });
-      console.log(respone);
-      const { data } = respone;
-      if (data.errors) {
-        toast.error("Error: " + data.errors);
-      } else {
-        setdata({});
-        toast.success("User registered successfully");
-        navigate("/login");
-      }
+      setdata({});
+      toast.success("User registered successfully");
+      navigate("/login");
     } catch (err) {
       console.log("error in signup", err);
     }
   };
+
+  const responese=async (authResult)=>{
+    try{
+      console.log("authResult")
+    }catch (err) {
+      console.log("Error during Google login", err)
+    }
+  }
+
+
+  const googlelogin = useGoogleLogin({
+    onSuccess:responese,
+    onError:responese,
+    flow:"auth-code"
+  })
+
   return (
     <div className="w-screen h-screen p-[1rem]">
       <div className="h-[100%] bg-zinc-800  mx-auto relative p-[1rem] flex rounded-lg gap-5 ">
@@ -119,9 +130,11 @@ const Login = () => {
                       })}
                     />
                     {errors.email && (
-                      <p style={{ color: "orangered" }}>
-                        {errors.firstname.message}
-                      </p>
+                      <>
+                        <p style={{ color: "orangered" }}>
+                          {errors.firstname.message}
+                        </p>
+                      </>
                     )}
                   </div>
                   <div className="w-96 flex flex-col mb-5">
@@ -145,9 +158,11 @@ const Login = () => {
                       })}
                     />
                     {errors.email && (
-                      <p style={{ color: "orangered" }}>
-                        {errors.lastname.message}
-                      </p>
+                      <>
+                        <p style={{ color: "orangered" }}>
+                          {errors.lastname.message}
+                        </p>
+                      </>
                     )}
                   </div>
                 </div>
@@ -169,7 +184,11 @@ const Login = () => {
                     })}
                   />
                   {errors.email && (
-                    <p style={{ color: "orangered" }}>{errors.email.message}</p>
+                    <>
+                      <p style={{ color: "orangered" }}>
+                        {errors.email.message}
+                      </p>
+                    </>
                   )}
                 </div>
                 <div className="w-full mb-5 flex flex-col">
@@ -192,9 +211,11 @@ const Login = () => {
                     })}
                   />
                   {errors.password && (
-                    <p style={{ color: "orangered" }}>
-                      {errors.password.message}
-                    </p>
+                    <>
+                      <p style={{ color: "orangered" }}>
+                        {errors.password.message}
+                      </p>
+                    </>
                   )}
                 </div>
                 <div className="w-full mb-5 flex flex-col">
@@ -208,18 +229,21 @@ const Login = () => {
                       type: "confirmPassword",
                       minLength: {
                         value: 8,
-                        message: "confirmPassword must be at least 8 characters long",
+                        message:
+                          "confirmPassword must be at least 8 characters long",
                       },
                       onChange: handleChange,
                       pattern: {
-                        message: "Password is Incorrect",
+                        message: "confirm Password is Incorrect",
                       },
                     })}
                   />
-                  {errors.password && (
-                    <p style={{ color: "orangered" }}>
-                      {errors.password.message}
-                    </p>
+                  {errors.confirmPassword && (
+                    <>
+                      <p style={{ color: "orangered" }}>
+                        {errors.confirmPassword.message}
+                      </p>
+                    </>
                   )}
                 </div>
                 <button
@@ -239,7 +263,7 @@ const Login = () => {
             <div className="mt-5 flex items-center gap-12">
               <button className="w-40 flex border-2 gap-5 border-zinc-600 py-4 px-3 items-center rounded-md">
                 <FaGoogle className="text-2xl" />
-                <span className="ml-3 capitalize font-serif text-xl">
+                <span className="ml-3 capitalize font-serif text-xl" onClick={googlelogin}>
                   Google
                 </span>
               </button>
@@ -257,4 +281,4 @@ const Login = () => {
   );
 };
 
-export default Login;
+export default signup;
