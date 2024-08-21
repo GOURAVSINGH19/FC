@@ -5,7 +5,7 @@ import { FaGoogle } from "react-icons/fa";
 import { FaGithub } from "react-icons/fa";
 import axios from "axios";
 import { toast } from "react-toastify";
-import { useGoogleLogin } from "@react-oauth/google";
+// import { useGoogleLogin } from "@react-oauth/google";
 const Login = () => {
   const navigate = useNavigate();
   const [data, setdata] = useState({
@@ -47,26 +47,28 @@ const Login = () => {
     }
   };
 
-  const responese = async (authResult) => {
-    try {
-      if (authResult["code"]) {
-        const result = await axios.post("/google", {
-          code: authResult["code"],
-        });
-        localStorage.setItem("token", result.data);
-        toast.success("Google login success");
-        navigate("/dashboard");
-      }
-    } catch (err) {
-      console.log("Error during Google login", err);
-    }
-  };
+  // const responese = async (authResult) => {
+  //   try {
+  //     if (authResult["code"]) {
+  //       const result = await axios.post("/google", {
+  //         code: authResult["code"],
+  //       });
+  //       const { email, name, picture } = result.data.user;
 
-  const googlelogin = useGoogleLogin({
-    onSuccess: responese,
-    onError: responese,
-    flow: "auth-code",
-  });
+  //       localStorage.setItem("token", result.data);
+  //       toast.success("Google login success");
+  //       navigate("/dashboard");
+  //     }
+  //   } catch (err) {
+  //     console.log("Error during Google login", err);
+  //   }
+  // };
+
+  // const googlelogin = useGoogleLogin({
+  //   onSuccess: responese,
+  //   onError: responese,
+  //   flow: "auth-code",
+  // });
 
   return (
     <div className="w-screen h-screen p-[1rem]">
@@ -180,7 +182,7 @@ const Login = () => {
                 <FaGoogle className="text-2xl" />
                 <span
                   className="ml-3 capitalize font-serif text-xl"
-                  onClick={googlelogin}
+                  // onClick={googlelogin}
                 >
                   Google
                 </span>

@@ -5,7 +5,6 @@ import { FaGoogle } from "react-icons/fa";
 import { FaGithub } from "react-icons/fa";
 import axios from "axios";
 import { toast } from "react-toastify";
-import { useGoogleLogin } from "@react-oauth/google";
 const signup = () => {
   const navigate = useNavigate();
 
@@ -55,20 +54,6 @@ const signup = () => {
     }
   };
 
-  const responese=async (authResult)=>{
-    try{
-      console.log("authResult")
-    }catch (err) {
-      console.log("Error during Google login", err)
-    }
-  }
-
-
-  const googlelogin = useGoogleLogin({
-    onSuccess:responese,
-    onError:responese,
-    flow:"auth-code"
-  })
 
   return (
     <div className="w-screen h-screen p-[1rem]">
@@ -263,7 +248,7 @@ const signup = () => {
             <div className="mt-5 flex items-center gap-12">
               <button className="w-40 flex border-2 gap-5 border-zinc-600 py-4 px-3 items-center rounded-md">
                 <FaGoogle className="text-2xl" />
-                <span className="ml-3 capitalize font-serif text-xl" onClick={googlelogin}>
+                <span className="ml-3 capitalize font-serif text-xl">
                   Google
                 </span>
               </button>

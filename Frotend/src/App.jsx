@@ -2,7 +2,7 @@ import React from "react";
 import Links from "./Routers/Links";
 import axios from "axios";
 // import { UserContextProvider } from "./context/ContextApi";
-axios.defaults.baseURL = "http://localhost:8000/users";
+axios.defaults.baseURL = "http://localhost:8000";
 axios.defaults.withCredentials = true;
 axios.defaults.headers = {
   "Content-Type": "application/json",

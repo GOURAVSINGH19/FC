@@ -10,6 +10,7 @@ mongoose
   })
   .catch(function (err) {
     dbug("Failed to connect",err);
+    console.log(err);
   });
 
 module.exports = mongoose.connection;

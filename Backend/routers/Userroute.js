@@ -1,4 +1,4 @@
-const express = require("express");
+const express = require("express")
 const {
   login,
   register,
@@ -7,20 +7,20 @@ const {
   Forgetpassword,
 } = require("../Controllers/Authcontroll");
 const router = express.Router();
-const cors = require("cors");
-const { Googleauth } = require("../Controllers/GoogleAuth");
-const authSchema = require("../Middlewares/AuthValidation");
-router.use(
-  cors({
-    Credential: true,
-    origin: "http://localhost:5173",
-  })
-);
+// const cors = require("cors");
 
-router.post("/register",authSchema, register);
-router.post("/login",authSchema, login);
+// // Use environment variables or a configuration file to manage allowed origins dynamically
+// const corsOptions = {
+//   credentials: true,
+//   origin: "http://localhost:5173",
+// };
+
+// router.use(cors(corsOptions));
+
+router.post("/register", register);
+router.post("/login", login);
 router.post("/logout", logout);
 router.post("/forget-password", Forgetpassword);
 router.post("/reset-password/:token", resetPassword);
-router.post("/google", Googleauth);
+
 module.exports = router;

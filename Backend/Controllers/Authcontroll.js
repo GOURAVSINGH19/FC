@@ -4,38 +4,50 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const crypto = require("crypto");
 const { sendMail } = require("../utils/Sendemail");
+
+
 module.exports.register = async function (req, res) {
   try {
     let { firstname, lastname, email, password, confirmPassword } = req.body;
+
+    if (password !== confirmPassword) {
+      return res.status(400).send("Passwords do not match");
+    }
+
     let user = await userModel.findOne({ email });
 
     if (user) {
       return res
         .status(503)
-        .send("you don't have permission to create a new user");
+        .send("You don't have permission to create a new user");
     }
 
     bcrypt.genSalt(10, function (err, salt) {
-      bcrypt.hash(password, salt, async function (err, hash) {
-        if (err) return res.send(err);
-        else {
-          let user = await userModel.create({
-            email,
-            password: hash,
-            confirmPassword: hash,
-            firstname: firstname,
-            lastname: lastname,
-          });
+      if (err) {
+        return res.status(500).send("Error hashing password");
+      }
 
-          let token = generateToken(user);
-          res.cookie("token", token);
-          sendMail(user.email,"Welcome to Our website",`Hi, ${firstname} Thank you for registering`)
-          res.send("created");
+      bcrypt.hash(password, salt, async function (err, hash) {
+        if (err) {
+          return res.status(500).send("Error hashing password");
         }
+
+        let user = await userModel.create({
+          email,
+          password: hash,
+          confirmPassword,
+          firstname: firstname,
+          lastname: lastname,
+        });
+
+        let token = generateToken(user);
+        res.cookie("token", token);
+        sendMail(user.email, "Welcome to Our website", `Hi, ${firstname} Thank you for registering`);
+        res.send("User created");
       });
     });
   } catch (err) {
-    res(500).send(err);
+    return res.status(500).send("Something went wrong in signup");
   }
 };
 
@@ -61,7 +73,7 @@ module.exports.login = async function (req, res) {
 
 module.exports.logout = async function (req, res) {
   res.clearCookie("token");
-  res.send("User logged out");
+  res.status(200).send('logout');
 };
 
 module.exports.Forgetpassword = async function (req, res) {
