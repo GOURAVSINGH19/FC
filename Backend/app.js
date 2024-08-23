@@ -8,6 +8,7 @@ const path = require("path");
 
 const index = require("./routers/index");
 const usersrouter = require("./routers/Userroute");
+const connectDB = require("./config/mongoose-connection");
 
 const dotenv = require('dotenv');
 
@@ -31,6 +32,6 @@ app.use(flash());
 app.use(express.static(path.join(__dirname, "public")));
 
 app.use("/", index);
-app.use("/users", usersrouter);
-
-app.listen(8000, () => console.log("listening on port 8000"));
+app.use("/info", usersrouter);
+connectDB()
+app.listen(process.env.PORT, () => console.log(`listening on port ${process.env.PORT}`));

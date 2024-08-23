@@ -8,7 +8,7 @@ const Dashboard = () => {
   const user = localStorage.getItem("token");
   const handleclick = async () => {
     try {
-      await axios.post("/users/logout");
+      await axios.post("http://localhost:8000/info/logout");
       localStorage.removeItem("token");
       navigate("/");
     } catch (err) {

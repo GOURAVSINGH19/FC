@@ -1,16 +1,14 @@
 const mongoose = require("mongoose");
-const config = require("config");
 
-const dbug = require("debug")("development:mongoose")
+const connectDB = async () => {
+  console.log(process.env.MONGODB_URI)
+  try {
+    const conn = await mongoose.connect(process.env.MONGODB_URI);
+    console.log(`MongoDB Connected: ${conn.connection.host}`);
+  } catch (error) {
+    console.error(`Error: ${error.message}`);
+    process.exit(1);
+  }
+};
 
-mongoose
-  .connect(`${config.get("MONGODB_URI")}/FC`)
-  .then(function () {
-    dbug("Connected");
-  })
-  .catch(function (err) {
-    dbug("Failed to connect",err);
-    console.log(err);
-  });
-
-module.exports = mongoose.connection;
+module.exports = connectDB;

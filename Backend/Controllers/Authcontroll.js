@@ -1,118 +1,113 @@
 const { generateToken } = require("../utils/generateToken");
 const userModel = require("../Models/UserModel");
 const bcrypt = require("bcrypt");
-const jwt = require("jsonwebtoken");
-const crypto = require("crypto");
-const { sendMail } = require("../utils/Sendemail");
-
-
-module.exports.register = async function (req, res) {
+const UserModel = require("../Models/UserModel");
+const sendEmail = require("../utils/Sendemail");
+module.exports.register = async (req, res) => {
+  const { firstname, lastname, email, password } = req.body;
+  console.log(email);
   try {
-    let { firstname, lastname, email, password, confirmPassword } = req.body;
-
-    if (password !== confirmPassword) {
-      return res.status(400).send("Passwords do not match");
+    const existingUser = await userModel.findOne({ email: email });
+    if (existingUser) {
+      return res.status(400).send("Email  already exists");
     }
 
-    let user = await userModel.findOne({ email });
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(password, salt);
 
-    if (user) {
-      return res
-        .status(503)
-        .send("You don't have permission to create a new user");
-    }
-
-    bcrypt.genSalt(10, function (err, salt) {
-      if (err) {
-        return res.status(500).send("Error hashing password");
-      }
-
-      bcrypt.hash(password, salt, async function (err, hash) {
-        if (err) {
-          return res.status(500).send("Error hashing password");
-        }
-
-        let user = await userModel.create({
-          email,
-          password: hash,
-          confirmPassword,
-          firstname: firstname,
-          lastname: lastname,
-        });
-
-        let token = generateToken(user);
-        res.cookie("token", token);
-        sendMail(user.email, "Welcome to Our website", `Hi, ${firstname} Thank you for registering`);
-        res.send("User created");
-      });
+    const user = new UserModel({
+      firstname,
+      lastname,
+      email,
+      password: hashedPassword,
     });
-  } catch (err) {
-    return res.status(500).send("Something went wrong in signup");
+    await user.save();
+
+    const token = generateToken(user);
+    res.cookie("token", token, { httpOnly: true });
+    res.status(200).send("User registered successfully");
+  } catch (error) {
+    console.error("Error registering user:", error);
+    res.status(500).send("Internal  server error");
   }
 };
 
-module.exports.login = async function (req, res) {
-  let { email, password } = req.body;
-
-  let user = await userModel.findOne({ email });
-
-  if (!user) {
-    return res.send("User not found");
-  }
-
-  bcrypt.compare(password, user.password, function (err, result) {
-    if (result) {
-      let token = generateToken(user);
-      res.cookie("token", token);
-      res.status(200).send({ data: token, message: "login" });
-    } else {
-      res.status(404).send("error");
+module.exports.login = async (req, res) => {
+  console.log(req.body);
+  const { email, password } = req.body;
+  try {
+    const user = await userModel.findOne({ email });
+    if (!user) {
+      res.status(404).send("User not found");
     }
-  });
+
+    const isPasswordCorrect = await bcrypt.compare(password, user.password);
+    if (!isPasswordCorrect) {
+      return res.status(401).send("Invalid  credentials");
+    }
+
+    const token = generateToken(user);
+    res.cookie("token", token);
+    res.status(200).send("Login successful");
+  } catch (error) {
+    console.error("Error logging in:", error);
+    res.status(500).send("Internal server error");
+  }
 };
 
-module.exports.logout = async function (req, res) {
+module.exports.logout = (req, res) => {
   res.clearCookie("token");
-  res.status(200).send('logout');
+  res.status(200).send("Logged out");
 };
 
-module.exports.Forgetpassword = async function (req, res) {
-  const { email} = req.body;
-  const user = await userModel.findOne({ email });
-  if (!user) {
-    return res.status(404).send("User not found");
+module.exports.forgotPassword = async (req, res) => {
+  console.log(req.body);
+
+  const { email } = req.body;
+  console.log(email);
+  try {
+    const user = await userModel.findOne({ email });
+    if (!user) {
+      return res.status(404).send("User not found");
+    }
+
+    const resetToken = generateToken(user);
+    console.log(resetToken)
+    user.resetPasswordToken = resetToken;
+    user.resetPasswordExpires = Date.now() + 3600000;
+    sendEmail(email, "Password Reset", resetToken);
+    await user.save();
+
+    res.status(200).send("Password reset email sent");
+  } catch (error) {
+    console.error("Error sending password reset email:", error);
+    res.status(500).send("Internal server error");
   }
-  const resetToken =  crypto.randomBytes(32).toString('hex');
-  user.resetPasswordToken = resetToken;
-  user.resetPasswordExpires = Date.now() + 3600000; 
-  await user.save();
-
-  await sendMail(email,"Reset your Password", resetToken);
-  res.status(200).send('Password reset email sent');
-  
 };
 
-module.exports.resetPassword = async function (req, res) {
-  const { id, token } = req.params;
-  const { password } = req.body;
+module.exports.resetPassword = async (req, res) => {
+  const { resetToken, newPassword } = req.body;
 
   try {
-    jwt.verify(token, process.env.JWT_KEY, (err, decode) => {
-      if (err) {
-        return res.status(400).send("Token expired or invalid");
-      } else {
-        bcrypt.hash(password, 10).then((hash) => {
-          userModel.findByIdAndUpdate(
-            { _id: id },
-            {
-              password: hash,
-            }
-          );
-        });
-      }
-      res.send("Password reset successfully");
+    const user = await userModel.findOne({
+      resetPasswordToken,
+      resetPasswordExpires: { $gt: Date.now() },
     });
-  } catch (err) {
-    res.send("password not changed: " + err.message);
+    if (!user) {
+      return res.status(400).send("Invalid or expired token");
+    }
+
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(newPassword, salt);
+
+    user.password = hashedPassword;
+    user.resetPasswordToken = undefined;
+    user.resetPasswordExpires = undefined;
+    await user.save();
+
+    res.status(200).send("Password   reset successfully");
+  } catch (error) {
+    console.error("Error resetting password:", error);
+    res.status(500).send("Internal server error");
   }
 };

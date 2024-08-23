@@ -2,7 +2,8 @@ const nodemailer = require("nodemailer");
 
 const PASSWORD_RESET_REQUEST_TEMPLATE = require("../multitrap/EmailTemplate");
 
-module.exports.sendMail = async (email, text, html, resetToken) => {
+const sendMail = async (email, text, resetToken) => {
+  console.log(resetToken);
   const transpoter = nodemailer.createTransport({
     host: "smtp.gmail.com",
     service: "gmail",
@@ -31,3 +32,5 @@ module.exports.sendMail = async (email, text, html, resetToken) => {
     else console.log("Email sent successfully");
   });
 };
+
+module.exports = sendMail;

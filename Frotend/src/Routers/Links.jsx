@@ -8,18 +8,9 @@ import { ToastContainer } from "react-toastify";
 import Notfound from "../Components/Notfound";
 import ForgetPassword from "../Components/Forgetpassword/ForgetPassword";
 import ChangePassword from "../Components/Forgetpassword/ChangePassword";
-import { GoogleOAuthProvider } from "@react-oauth/google";
 const Links = () => {
   const userToken = localStorage.getItem("token");
 
-  const GoogleLogin = () => {
-    const id = "1041971490330-als8m1itahm6192bn019ssmpmcp1lujk.apps.googleusercontent.com";
-    return (
-      <GoogleOAuthProvider clientId={id}>
-        <Login />
-      </GoogleOAuthProvider>
-    );
-  };
   return (
     <>
       <ToastContainer
@@ -38,7 +29,7 @@ const Links = () => {
       <Routes>
         <Route path="/" element={<Home />} />​
         {userToken && <Route path="/dashboard" element={<Dashboard />} />}
-        <Route path="/login" element={<GoogleLogin />} />
+        <Route path="/login" element={<Login/>} />
         <Route path="/signup" element={<Signin />} />
         <Route path="/forget-password" element={<ForgetPassword />} />
         <Route path="/reset_password/:token" element={<ChangePassword />} />

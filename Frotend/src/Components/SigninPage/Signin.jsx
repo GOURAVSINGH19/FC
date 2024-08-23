@@ -37,15 +37,16 @@ const signup = () => {
   };
 
   const onsubmit = async (e) => {
-    const { firstname, lastname, email, password, confirmPassword } = data;
+    const { firstname, lastname, email, password} = data;
+
     try {
-      const { data } = await axios.post("/users/register", {
-        email,
+      const response = await axios.post("http://localhost:8000/info/signup/", {
         firstname,
         lastname,
+        email,
         password,
-        confirmPassword,
       });
+      console.log(response);
       setdata({});
       toast.success("User registered successfully");
       navigate("/login");

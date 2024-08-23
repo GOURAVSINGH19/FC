@@ -24,7 +24,7 @@ const ForgetPassword = () => {
     const { email } = data;
     const OTP = Math.floor(Math.random() * 9000 + 1000);
     try {
-      await axios.post("/users/forget-password", {
+      await axios.post("http://localhost:8000/info/forget-password/", {
         email,
         OTP
       });

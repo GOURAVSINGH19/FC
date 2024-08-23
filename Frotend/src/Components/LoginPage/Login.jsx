@@ -1,11 +1,10 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { useForm } from "react-hook-form";
 import { Link, useNavigate } from "react-router-dom";
 import { FaGoogle } from "react-icons/fa";
 import { FaGithub } from "react-icons/fa";
 import axios from "axios";
 import { toast } from "react-toastify";
-// import { useGoogleLogin } from "@react-oauth/google";
 const Login = () => {
   const navigate = useNavigate();
   const [data, setdata] = useState({
@@ -35,7 +34,7 @@ const Login = () => {
   const onsubmit = async (e) => {
     const { email, password } = data;
     try {
-      const { data: res } = await axios.post("/login", {
+      const res = await axios.post("http://localhost:8000/info/login", {
         email,
         password,
       });
@@ -46,29 +45,6 @@ const Login = () => {
       console.log("error in login", err);
     }
   };
-
-  // const responese = async (authResult) => {
-  //   try {
-  //     if (authResult["code"]) {
-  //       const result = await axios.post("/google", {
-  //         code: authResult["code"],
-  //       });
-  //       const { email, name, picture } = result.data.user;
-
-  //       localStorage.setItem("token", result.data);
-  //       toast.success("Google login success");
-  //       navigate("/dashboard");
-  //     }
-  //   } catch (err) {
-  //     console.log("Error during Google login", err);
-  //   }
-  // };
-
-  // const googlelogin = useGoogleLogin({
-  //   onSuccess: responese,
-  //   onError: responese,
-  //   flow: "auth-code",
-  // });
 
   return (
     <div className="w-screen h-screen p-[1rem]">
@@ -180,10 +156,7 @@ const Login = () => {
             <div className="mt-5 flex items-center gap-12">
               <button className="w-40 flex border-2 gap-5 border-zinc-600 py-4 px-3 items-center rounded-md">
                 <FaGoogle className="text-2xl" />
-                <span
-                  className="ml-3 capitalize font-serif text-xl"
-                  // onClick={googlelogin}
-                >
+                <span className="ml-3 capitalize font-serif text-xl">
                   Google
                 </span>
               </button>

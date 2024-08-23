@@ -11,7 +11,6 @@ const isloggedin = async function (req, res, next) {
     let user = await userModel
       .findOne({ email: decode.email })
       .select("-password");
-      req.user = user;
       next();
   } catch (err) {
     return res.status(500).send("Server Error");
